@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import './Home.css'; // Importar el archivo CSS
+import './home.css'; // Importar el archivo CSS
 
 // Componente que muestra un Pokémon aleatorio en la página de inicio
 const Home = () => {

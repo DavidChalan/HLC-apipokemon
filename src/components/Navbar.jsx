@@ -2,7 +2,7 @@ import {useState, useEffect} from "react";
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Luna, Sol } from "./Icons";
-import './navbar.css';
+import './Navbar.css';
 import logoGif from '../assets/Pokemon-23-11-2024.gif'
 
 
