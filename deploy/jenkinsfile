@@ -1,0 +1,29 @@
+pipeline {
+    agent any
+
+    environment {
+        K8S_SERVER = "https://192.168.49.2:8443" // IP obtenida con kubectl cluster-info
+        K8S_TOKEN = credentials('k8s-token')  // Token configurado en Jenkins
+        NAMESPACE = "default"
+    }
+
+    stages {
+        stage('Clonar repositorio GitHub') {
+            steps {
+                git branch: 'master', url: 'https://github.com/DavidChalan/HLC-apipokemon.git'
+            }
+        }  
+
+        stage('Validar conexión a Kubernetes') {
+            steps {
+                script {
+                    sh """
+                        echo "Conectando a Kubernetes en: $K8S_SERVER"
+                        echo "Token de Kubernetes: $K8S_TOKEN"
+                        curl -k -H "Authorization: Bearer $K8S_TOKEN" $K8S_SERVER/api/v1/namespaces/$NAMESPACE/pods
+                    """
+                }
+            }
+        }       
+    }
+}
