@@ -12,7 +12,7 @@ pipeline {
         // KUBE_CONFIG = credentials('kubeconfig') // Configura una credencial en Jenkins con el Kubeconfig de tu VPS
     }
     stages {
-        stage('Clonar repositorio git Autocaravaneando desde Github') {
+        stage('Clonar repositorio git Pokeapi desde Github') {
             steps {
                 git branch: 'main', url: 'https://github.com/DavidChalan/HLC-apipokemon.git'
             }
