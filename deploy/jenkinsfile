@@ -11,17 +11,18 @@ pipeline {
             }
         }
         stage('Configurar acceso a Kubernetes') {
-            steps {
-                withCredentials([string(credentialsId: 'k8s-token', variable: 'K8S_TOKEN')]) {
-                    sh """
-                    kubectl config set-cluster k8s-cluster --server=$K8S_SERVER --insecure-skip-tls-verify=true
-                    kubectl config set-credentials jenkins --token=${env.K8S_TOKEN}
-                    kubectl config set-context jenkins --cluster=k8s-cluster --user=jenkins --namespace=$NAMESPACE
-                    kubectl config use-context jenkins
-                    """
-                }
-            }
+    steps {
+        withCredentials([string(credentialsId: 'k8s-token', variable: 'K8S_TOKEN')]) {
+            sh """
+            kubectl config set-cluster k8s-cluster --server=$K8S_SERVER --insecure-skip-tls-verify=true
+            kubectl config set-credentials jenkins --token=${env.K8S_TOKEN}
+            kubectl config set-context jenkins --cluster=k8s-cluster --user=jenkins --namespace=$NAMESPACE
+            kubectl config use-context jenkins
+            """
         }
+    }
+}
+
         stage('Verificar conexión con Kubernetes') {
             steps {
                 script {
