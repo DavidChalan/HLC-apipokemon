@@ -14,7 +14,7 @@ pipeline {
     stages {
         stage('Clonar repositorio git Autocaravaneando desde Github') {
             steps {
-                git branch: 'master', url: 'https://github.com/DavidChalan/HLC-apipokemon.git'
+                git branch: 'main', url: 'https://github.com/DavidChalan/HLC-apipokemon.git'
             }
         }
         stage('Acciones'){
