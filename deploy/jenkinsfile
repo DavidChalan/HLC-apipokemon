@@ -1,41 +1,69 @@
 pipeline {
     agent any
-
     environment {
-        K8S_SERVER = "https://192.168.49.2:8443" // IP del clúster Kubernetes
-        K8S_TOKEN = credentials('k8s-token')  // Token configurado en Jenkins
-        NAMESPACE = "default"
+        K8S_SERVER = "https://192.168.49.2:8443"
+        K8S_TOKEN = credentials('k8s-token')
+        NAMESPACE="default"
+        // REGISTRY = "morgadoberruezo"  // Cambia     por tu usuario de Docker Hub o tu registro privado
+        // IMAGE_NAME = "react"
+        // TAG = "latest"
+        // DOCKER_HUB_USER="morgadoberruezo@gmail.com"
+        // DOCKER_HUB_PASSWORD="Claudia2009?"
+        // KUBE_CONFIG = credentials('kubeconfig') // Configura una credencial en Jenkins con el Kubeconfig de tu VPS
     }
-
     stages {
-        stage('Clonar repositorio GitHub') {
+        stage('Clonar repositorio git Autocaravaneando desde Github') {
             steps {
-                script {
-                    checkout([$class: 'GitSCM',
-                        branches: [[name: 'main']],  // Aseguramos que clona la rama main
-                        userRemoteConfigs: [[
-                            url: 'https://github.com/DavidChalan/HLC-apipokemon.git'
-                        ]]
-                    ])
+                git branch: 'master', url: 'https://github.com/DavidChalan/HLC-apipokemon.git'
+            }
+        }
+        stage('Acciones'){
+            steps{
+                script{
+                    sh """
+                        echo $K8S_SERVER
+                        echo $K8S_TOKEN
+                    """
                 }
             }
         }
-
-        stage('Validar conexión a Kubernetes') {
+        stage('Configurar acceso a Kubernetes') {
             steps {
                 script {
-                    def response = sh(script: """
-                        echo "Conectando a Kubernetes en: $K8S_SERVER"
-                        echo "Usando Token: $K8S_TOKEN"
-                        curl -k -H "Authorization: Bearer $K8S_TOKEN" $K8S_SERVER/api/v1/namespaces/$NAMESPACE/pods
-                    """, returnStatus: true)  // Captura el código de salida
-
-                    if (response != 0) {
-                        error("ERROR: No se pudo conectar a Kubernetes. Verifica el servidor o las credenciales.")
-                    }
+                    sh """
+                    kubectl config set-cluster k8s-cluster --server=$K8S_SERVER --insecure-skip-tls-verify=true
+                    kubectl config set-credentials jenkins --token=$K8S_TOKEN
+                    kubectl config set-context jenkins --cluster=k8s-cluster --user=jenkins --namespace=$NAMESPACE
+                    kubectl config use-context jenkins
+                    """
                 }
             }
+        }
+         stage('Verificar kubectl 1') {
+            steps {
+                sh 'kubectl version --client'
+                // sh 'kubectl config current-context' // Verifica que está usando el contexto correcto
+                sh 'kubectl get nodes' // Confirma conexión con el clúster
+            }
+        }
+        stage('Deploy en Kubernetes') {
+            steps {
+                script {
+                        // sh "kubectl apply -f deploy/kubernetes/namespace.yaml"
+                        // sh "kubectl apply -f deploy/kubernetes/configMap.yaml"
+                        // sh "kubectl apply -f deploy/kubernetes/pvc.yaml"
+                        sh "kubectl apply -f deploy/kubernetes/deploy.yaml"
+                        sh "kubectl apply -f deploy/kubernetes/serviceNP.yaml"
+                    }
+            }
+        }
+    }
+    post {
+        success {
+            echo "Despliegue completado con éxito"
+        }
+        failure {
+            echo "Error en el despliegue"
         }
     }
 }
-//comentario 1
